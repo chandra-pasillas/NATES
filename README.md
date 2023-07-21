@@ -1,16 +1,8 @@
 # night2day
 to do list 
+turn form one time stamp in one folder to use 1 folder many timestamps
 
-config file to set paths call the config file in each processing step if necessary
-soln: run from where rw data is
-
-POSTPROCESSING
-- need to have a code to rebuild the larger array ( from patches at each time step).
-  This way I can have single image of the area for test cases.
-  Later I would be running the learned model on different data set and can hopefully
-  reprocess the image by time and area as well.
-
-# Get started
+# Get started- updated for NATE thesis process ( keep updating)
 The `main.py` file (probably found in the `READY` folder) can be run as a program
 from the command line. For example, if the path to main is `/a/b/c/night2day/READY/main.py`
 then we can run the program and ask for its help message like:
@@ -24,7 +16,6 @@ running the program and asking for the help message would look like:
 ```shell
 night2day --help
 ```
-
 In any case, you use the program on a folder of `.h5` files. You should have a
 folder containing a directory of `.h5` files named `raw-data` or `RAWDATA` or
 some other name staring with `raw`. If you are in such a root folder and listed the contents
@@ -44,7 +35,7 @@ like which sensor data it contains, and when exactly it was captured.
 
 In that current directory (the parent of the `raw` folder), run the first step like:
 ```shell
-night2day pack-case
+night2day AHI-only pathtonpz
 ```
 This command will find all the `.h5` files in the `raw` folder, match them up by time,
 colocated the various channels, save intermediate results like pictures and array data,
@@ -53,38 +44,26 @@ the available channels and samples from the `.h5` files.
 
 Next, run:
 ```shell
-night2day normalize
+night2day PREDICT-master
 ```
 This command will use the original channels to compute several derived channels
 that are normalized using constants appropriate to each sensor. It ultimately writes
 out the file `case_norm.npz`, a `Numpy` array file with all the original channels,
 plus all the newly calculated normalized channels.
 
-Now we are ready to prepare the inputs to the machine learning model. Run:
+Now we are ready to push the inputs/predictors to the machine learning model. For ease it is best to do this where the model is stored
+Be sure to first open the FNN-AHI-predict to edit and be sure you have the savefile name something you want
+Run:
 ```shell
-night2day learn-prep
+night2day FNN-AHI-predict pathtonpz pathto model(without the backslash) pathtomodelchannels
 ```
-This will write out all the available channels to a file `learning_channels.txt`,
-and ask you to edit this file. As the first lines of this file explain, you select 
-which channel to predict by using an asterisk `*` next to its name, and you
-ignore channels by commenting out their names with the pound `#`.
 
-Once you edit this file to select the predictor channels and the predicted channel,
-run this again:
-```shell
-night2day learn-prep
-```
-The program will read `learning_channels.txt` and `case_norm.npz`, segment the
-sensor data into small chunks of 2-dimensional data called `patches`, throw out
-patches that are outside the area-of-interest, and create shuffled collections
-of patches for training and testing the machine learning model.
+This make the ML output for the input.  From here you can import it into notebooks and view and manipulate the data for analysis.
 
-In the folder `ML_INPUT`, it will create a folder representing the current
-channel selection, and write out a file `data.npz` containing the array data
-for training a machine learning model, along with a description of the data.
-This `data.npz` file is ready to be used with a machine learning process
-developed previously in our lab.
 
+
+
+#other stuff
 For any of the `.npz` files produced by this program, you can access
 and inspect them using `Numpy`. Interactively you can see what arrays a
 `.npz` file contains like:
